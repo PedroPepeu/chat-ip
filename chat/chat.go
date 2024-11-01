@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	// github imports
 	"github.com/charmbracelet/bubbles/textarea"
@@ -21,10 +22,6 @@ type msg_chat struct {
 	send      bool
 	delivered bool
 }
-
-type (
-	errMsg error
-)
 
 type chat struct {
 	viewport	viewport.Model
@@ -95,32 +92,24 @@ func (c chat) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// send message
 		case tea.KeyEnter:
-
-			// type msg_chat struct {
-			// 	who       string
-			// 	message   string
-			// 	time      string
-			// 	send      bool
-			// 	delivered bool
-			// }
-
 			message := msg_chat {
 				who:		c.own_name,
-				message:	c.msg,
-				time:		time.Now(),
+				message:	c.textarea.Value(),
+				time:		time.Now().Format(time.RFC1123),
 				send:		true,
 				delivered:	true,
+			}			
+
+			// c.msg = append(c.msg, c.senderStyle.Render(c.own_name)+c.textarea.Value())
+			c.msg = append(c.msg, message)
+			var formattedMessages []string
+			for _, msg := range c.msg {
+				formattedMessages = append(formattedMessages, fmt.Sprintf("%s: %s", msg.who, msg.message))
 			}
 
-			c.msg = append(message, c.senderStyle.Render(c.own_name)+c.textarea.Value())
-			c.viewport.SetContent(strings.Join(c.msg, "\n"))
+			c.viewport.SetContent(strings.Join(formattedMessages, "\n"))
 			c.textarea.Reset()
 			c.viewport.GotoBottom()
-
-		// handling errors
-		case errMsg:
-			c.err = msg
-			return c, nil
 
 		// export chat
 		case tea.KeyCtrlS:
