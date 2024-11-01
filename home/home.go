@@ -100,7 +100,9 @@ func (hs homeScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Did the user press enter while the submit button was focused?
 			// If so, exit.
 			if s == "enter" && hs.focusIndex == len(hs.inputs) {
-				return hs, tea.Quit
+				ip := hs.inputs[0].Value()
+				alias := hs.inputs[1].Value()
+				return chat.InitialModel(ip, alias).Update(msg)
 			}
 
 			// Cycle indexes
@@ -134,12 +136,6 @@ func (hs homeScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return hs, tea.Batch(cmds...)
 		}
 	}
-		// confirm
-		case "enter", " ":
-			return chat.InitialModel().Update(msg)
-			
-		}
-	
 
 	cmd := hs.updateInputs(msg)
 	return hs, cmd

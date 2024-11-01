@@ -1,10 +1,12 @@
 package chat
 
 import (
+	// golang imports
 	"fmt"
 	"os"
 	"os/exec"
 
+	// github imports
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -25,10 +27,10 @@ type chat struct {
 	cursor    int
 }
 
-func InitialModel() chat {
+func InitialModel(ip string, ownName string) chat {
 	return chat{
-		ip:       "127.0.0.1",
-		own_name: "user",
+		ip:       ip,
+		own_name: ownName,
 	}
 }
 
@@ -80,7 +82,7 @@ func (c chat) View() string {
 }
 
 func main() {
-	p := tea.NewProgram(InitialModel())
+	p := tea.NewProgram(InitialModel("0.0.0.0", "default"))
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
