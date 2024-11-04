@@ -32,6 +32,7 @@ type msg_chat struct {
 type chat struct {
 	viewport    viewport.Model
 	ip          string
+	port        string
 	own_name    string
 	they_name   []string
 	msg         []msg_chat
@@ -40,11 +41,11 @@ type chat struct {
 	err         error
 }
 
-func InitialModel(ip string, ownName string) chat {
+func InitialModel(ip string, port string, ownName string) chat {
 	width, height, _ := utils.GetTerminalSize()
 
 	ta := textarea.New()
-	ta.Placeholder = fmt.Sprintf("Connected to %s, as %s", ip, ownName)
+	ta.Placeholder = fmt.Sprintf("Connected to %s:%s, as %s", ip, port, ownName)
 	ta.Focus()
 
 	ta.Prompt = "| "
@@ -65,6 +66,7 @@ func InitialModel(ip string, ownName string) chat {
 
 	return chat{
 		ip:          ip,
+		port:        port,
 		own_name:    ownName,
 		textarea:    ta,
 		msg:         []msg_chat{},
@@ -140,7 +142,7 @@ func (c chat) View() string {
 }
 
 func main() {
-	p := tea.NewProgram(InitialModel("0.0.0.0", "default"))
+	p := tea.NewProgram(InitialModel("0.0.0.0", "1234", "default"))
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)

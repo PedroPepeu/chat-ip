@@ -38,7 +38,7 @@ type homeScreen struct {
 
 func InitialModel() homeScreen {
 	hs := homeScreen{
-		inputs: make([]textinput.Model, 2),
+		inputs: make([]textinput.Model, 3),
 	}
 
 	var t textinput.Model
@@ -55,6 +55,10 @@ func InitialModel() homeScreen {
 			t.TextStyle = focusedStyle
 
 		case 1:
+			t.Placeholder = ":1234"
+			t.CharLimit = 4
+
+		case 2:
 			t.Placeholder = "Alias"
 			t.CharLimit = 20
 		}
@@ -102,8 +106,9 @@ func (hs homeScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// If so, exit.
 			if s == "enter" && hs.focusIndex == len(hs.inputs) {
 				ip := hs.inputs[0].Value()
-				alias := hs.inputs[1].Value()
-				return chat.InitialModel(ip, alias).Update(msg)
+				port := hs.inputs[1].Value()
+				alias := hs.inputs[2].Value()
+				return chat.InitialModel(ip, port, alias).Update(msg)
 			}
 
 			// Cycle indexes
