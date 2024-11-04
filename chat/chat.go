@@ -13,6 +13,12 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
+	utils "chatip/utils"
+)
+
+var (
+	focusedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 )
 
 type msg_chat struct {
@@ -24,7 +30,7 @@ type msg_chat struct {
 }
 
 type chat struct {
-	viewport	viewport.Model
+	viewport    viewport.Model
 	ip          string
 	own_name    string
 	they_name   []string
@@ -35,6 +41,8 @@ type chat struct {
 }
 
 func InitialModel(ip string, ownName string) chat {
+	width, height, _ := utils.GetTerminalSize()
+
 	ta := textarea.New()
 	ta.Placeholder = fmt.Sprintf("Connected to %s, as %s", ip, ownName)
 	ta.Focus()
@@ -42,21 +50,22 @@ func InitialModel(ip string, ownName string) chat {
 	ta.Prompt = "| "
 	ta.CharLimit = 280
 
-	ta.SetWidth(30)
-	ta.SetHeight(3)
+	ta.SetWidth(width)
+	ta.SetHeight(2)
 
 	ta.FocusedStyle.CursorLine = lipgloss.NewStyle()
+	ta.FocusedStyle.CursorLine = focusedStyle
 
 	ta.ShowLineNumbers = false
 
-	vp := viewport.New(30, 5)
+	vp := viewport.New(width, height-4)
 	vp.SetContent("Type a message and press (enter) to send.")
 
 	ta.KeyMap.InsertNewline.SetEnabled(false)
 
 	return chat{
-		ip:			 ip,
-		own_name:	 ownName,
+		ip:          ip,
+		own_name:    ownName,
 		textarea:    ta,
 		msg:         []msg_chat{},
 		viewport:    vp,
@@ -92,13 +101,13 @@ func (c chat) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// send message
 		case tea.KeyEnter:
-			message := msg_chat {
-				who:		c.own_name,
-				message:	c.textarea.Value(),
-				time:		time.Now().Format(time.RFC1123),
-				send:		true,
-				delivered:	true,
-			}			
+			message := msg_chat{
+				who:       c.own_name,
+				message:   c.textarea.Value(),
+				time:      time.Now().Format(time.RFC1123),
+				send:      true,
+				delivered: true,
+			}
 
 			// c.msg = append(c.msg, c.senderStyle.Render(c.own_name)+c.textarea.Value())
 			c.msg = append(c.msg, message)
@@ -124,7 +133,7 @@ func (c chat) View() string {
 	// chat mode
 	s := fmt.Sprintf("%s\n\n%s",
 		c.viewport.View(),
-		c.textarea.View(),
+		focusedStyle.Render(c.textarea.View()),
 	) + "\n\n"
 
 	return s

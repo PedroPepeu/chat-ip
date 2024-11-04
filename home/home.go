@@ -15,6 +15,7 @@ import (
 
 	// project imports
 	chat "chatip/chat"
+	utils "chatip/utils"
 )
 
 var (
@@ -30,13 +31,13 @@ var (
 )
 
 type homeScreen struct {
-	focusIndex 	 int
-	inputs 		 []textinput.Model
-	cursorMode 	 cursor.Mode
+	focusIndex int
+	inputs     []textinput.Model
+	cursorMode cursor.Mode
 }
 
 func InitialModel() homeScreen {
-	hs := homeScreen {
+	hs := homeScreen{
 		inputs: make([]textinput.Model, 2),
 	}
 
@@ -52,7 +53,7 @@ func InitialModel() homeScreen {
 			t.Focus()
 			t.PromptStyle = focusedStyle
 			t.TextStyle = focusedStyle
-		
+
 		case 1:
 			t.Placeholder = "Alias"
 			t.CharLimit = 20
@@ -154,7 +155,6 @@ func (hs *homeScreen) updateInputs(msg tea.Msg) tea.Cmd {
 func (hs homeScreen) View() string {
 	var b strings.Builder
 
-
 	for i := range hs.inputs {
 		b.WriteString(hs.inputs[i].View())
 		if i < len(hs.inputs)-1 {
@@ -168,7 +168,18 @@ func (hs homeScreen) View() string {
 	}
 	fmt.Fprintf(&b, "\n\n%s\n\n", *button)
 
-	return b.String()
+	width, height, err := utils.GetTerminalSize()
+
+	if err != nil {
+		return "Error retrieving terminal size."
+	}
+
+	centeredStyle := lipgloss.NewStyle().
+		Align(lipgloss.Center).
+		Width(width).
+		PaddingTop(height / 2)
+
+	return centeredStyle.Render(b.String())
 }
 
 func main() {
